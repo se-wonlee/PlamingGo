@@ -1,0 +1,277 @@
+mvc2
+
+1..프로젝트처음 web xml 수정 서블릿네임,클래스 이름지정등등...
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>pizzahutPrj</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <servlet>
+  	<servlet-name>pizzahutdispatcher</servlet-name>
+  	<servlet-class>pizza.controller.PizzaDipather</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>pizzahutdispatcher</servlet-name>
+  	<url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+</web-app>
+
+
+2..그다음 자바 리소스 들어감 디스패처에 들어가서
+
+
+   package pizza.controller;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import pizza.controller.board.PizzaController;
+import pizza.controller.board.PizzadetailController;
+
+public class PizzaDipather extends HttpServlet{
+	
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		service(request, response);
+	}
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		service(request, response);
+	}
+	@Override
+	protected void service(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("service 도착");
+		//요청 url 추출
+		String uri=request.getRequestURI();// /pizzahutPrj/pizzahut/pizza.do
+		String conPath=request.getContextPath();// /pizzahutPrj
+		String com=uri.substring(conPath.length());
+		System.out.println("com : "+com);
+		
+		PizzaControll pcontroller=null;
+		
+		try {
+			if (com.equals("/pizzahut/pizza.do")) { -> 이주소를 누르면(요청이들어오면)
+				System.out.println("pizza.do 도착");
+				//컨트롤러로 연결
+				pcontroller=new PizzaController(); -> 이 컨트롤러로 들어가라
+			}else if (com.equals("/pizzahut/pizzadetail.do")) {
+				pcontroller=new PizzadetailController();
+			}
+			pcontroller.pexecute(request, response);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+
+}
+
+
+   httpservlet을 상속받아서 doget과 dopost를 메소드를 만들고
+  
+   service 메소드를 만들고 요청주소가들어오면
+
+   String uri=request.getRequestURI();
+   String conPath=request.getContextPath();
+   String com=uri.substring(conPath.length());
+
+
+   등등 들어온 주소를알아낼수있음
+
+   그다음 이프문으로 "/pizzahut/pizza.do" 이주소라면 PizzaController 로 가라 =
+
+    
+	try {
+		if (com.equals("/pizzahut/pizza.do")) { -> 이주소를 누르면(요청이들어오면)
+		System.out.println("pizza.do 도착");
+		//컨트롤러로 연결
+		pcontroller=new PizzaController(); -> 이 컨트롤러로 들어가라
+	}else if (com.equals("/pizzahut/pizzadetail.do")) {
+		pcontroller=new PizzadetailController();
+	}
+	pcontroller.pexecute(request, response);
+	} catch (Exception e) {
+	// TODO Auto-generated catch block
+		e.printStackTrace();
+		}
+	}
+	
+
+    MboardController 로 들어가고 
+
+    
+
+3....
+
+
+package pizza.controller.board;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import pizza.controller.PizzaControll;
+import pizza.dao.PizzaDao;
+import pizza.vo.Pizza;
+
+public class PizzaController implements PizzaControll{
+
+	@Override
+	public void pexecute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		System.out.println("PizzaController signal");
+		
+		PizzaDao dao=new PizzaDao();
+		List<Pizza> list=dao.getPizzaList();
+		
+		request.setAttribute("list", list);
+		request.getRequestDispatcher("pizza.jsp").forward(request, response);
+	}
+
+}
+
+
+
+
+PizzaController로 들어온후 
+
+PizzaDao dao=new PizzaDao();
+List<Pizza> list=dao.getPizzaList();
+
+를 호출해서 
+
+PizzaDao 로들어감 
+
+
+4......
+
+package pizza.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import pizza.db.DBCon;
+import pizza.vo.Pizza;
+
+public class PizzaDao {
+
+	public List<Pizza> getPizzaList() throws Exception {
+		System.out.println("getPizzaList signal~~");
+		//DB  pizhuttbl에서 데이터 프로젝트로 가져오기 
+		Connection con=DBCon.getCon();
+		String sql="select * from pizhuttbl";
+		
+		PreparedStatement pstmt=con.prepareStatement(sql);
+		
+		ResultSet rs=pstmt.executeQuery();
+		
+		//list에 담기
+		List<Pizza> list=new ArrayList<Pizza>();
+		while (rs.next()) {
+			Pizza pz=new Pizza();
+			pz.setPno(rs.getString("pno"));
+			pz.setPmenu(rs.getString("pmenu"));
+			pz.setPprice(rs.getInt("pprice"));
+			pz.setPdate(rs.getDate("pdate"));
+			pz.setPimg(rs.getString("pimg"));
+			
+			list.add(pz);
+		}
+		rs.close();
+		pstmt.close();
+		con.close();
+		
+		return list;
+		
+	}
+
+	public Pizza getPazza(String pno) throws Exception {
+		Connection con=DBCon.getCon();
+		
+		String sql="select * from pizhuttbl where pno="+pno;
+		
+		Statement st=con.createStatement();
+		ResultSet rs=st.executeQuery(sql);
+		
+		rs.next();
+		Pizza pz=new Pizza();
+		pz.setPno(rs.getString("pno"));
+		pz.setPmenu(rs.getString("pmenu"));
+		pz.setPprice(rs.getInt("pprice"));
+		pz.setPdate(rs.getDate("pdate"));
+		pz.setPimg(rs.getString("pimg"));
+		
+		rs.close();
+		st.close();
+		con.close();
+
+		return pz;
+	}
+
+}
+
+
+
+호출된 PizzaDao 에서 결과처리후 db를 거쳐서 다시돌아오고 결과값을 list로 보내줌
+
+
+5.... 그다음 view 에서 받은결과값을 taglib을 거쳐서 출력
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<% request.setCharacterEncoding("utf-8"); %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>jsp!</title>
+</head>
+<body>
+<h2>pizza.jsp</h2>
+
+<table>
+<tr>
+	<th>pno</th>
+	<th>pmenu</th>
+	<th>pprice</th>
+	<th>pdate</th>
+	<th>pimg</th>
+	
+</tr>
+<c:forEach items="${list }" var="p"> list안에들어있는 요소를 p로 정의해줌
+<tr>
+	<td>${p.pno }</td> -> p안에들어있는 요소를 다출력
+	<td>
+	<a href="pizzadetail.do?c=${p.pno }">${p.pmenu }</a> 
+	</td>
+	<td>${p.pprice }</td>
+	<td>${p.pdate }</td>
+	<td>${p.pimg }</td>
+</tr>
+</c:forEach>
+</table>
+
+</body>
+</html>

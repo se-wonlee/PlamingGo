@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.PlamingGo.dao.MovieDao">
+<!-- 검색창 + 페이징처리 include할 sql -->
+	<sql id="getSearchCount">
+		<choose>
+			<when test="param2==1">
+				WHERE (MOVIE_TITLE LIKE '%'||#{param1}||'%')
+			</when>
+			<when test="param2==2">
+				WHERE (MOVIE_ACTOR LIKE '%'||#{param1}||'%')
+			</when>
+			<when test="param2==3">
+				WHERE (MOVIE_DIRECTOR LIKE '%'||#{param1}||'%')
+			</when>
+		</choose>
+	</sql>
+	
+	<!-- 검색창 include할 sql -->
+	<sql id="getSearchList">
+		<choose>
+			<when test="param4==1">
+				WHERE (MOVIE_TITLE LIKE '%'||#{param3}||'%')  
+			</when>
+			<when test="param4==2">
+				WHERE (MOVIE_ACTOR LIKE '%'||#{param3}||'%')
+			</when>
+			<when test="param4==3">
+				WHERE (MOVIE_DIRECTOR LIKE '%'||#{param3}||'%')
+			</when>
+		</choose>
+	</sql>
+
+	<select id="selectMovieCount" resultType="Integer">
+		SELECT COUNT(*) FROM
+		PG_MOVIE
+	</select>
+
+	<select id="getmovielist"
+		resultType="com.tech.PlamingGo.dto.MovieDto">
+
+		SELECT
+		MOVIE_CODE,
+		MOVIE_TITLE,
+		MOVIE_IMG,
+		MOVIE_AGE,
+		MOVIE_TIME,
+		MOVIE_SUMMARY,
+		MOVIE_DIRECTOR,
+		MOVIE_ACTOR,
+		MOVIE_GENRE,
+		MOVIE_NATION,
+		MOVIE_DATE,
+		MOVIE_RATING
+
+		FROM PG_MOVIE ORDER BY MOVIE_TITLE
+		ASC
+
+	</select>
+
+	<select id="movie_detail"
+		resultType="com.tech.PlamingGo.dto.MovieDto">
+		SELECT * FROM PG_MOVIE WHERE
+		MOVIE_CODE=#{param1,jdbcType=VARCHAR}
+
+	</select>
+
+	<update id="movie_modify_view">
+		UPDATE PG_MOVIE SET
+		MOVIE_TITLE=#{param2,
+		jdbcType=VARCHAR},
+		MOVIE_IMG=#{param3,
+		jdbcType=VARCHAR},
+		MOVIE_AGE=#{param4,
+		jdbcType=VARCHAR},
+		MOVIE_TIME=#{param5,
+		jdbcType=VARCHAR},
+		MOVIE_SUMMARY=#{param6,
+		jdbcType=VARCHAR},
+		MOVIE_DIRECTOR=#{param7,
+		jdbcType=VARCHAR},
+		MOVIE_ACTOR=#{param8,
+		jdbcType=VARCHAR},
+		MOVIE_GENRE=#{param9,
+		jdbcType=VARCHAR},
+		MOVIE_NATION=#{param10,
+		jdbcType=VARCHAR},
+		MOVIE_DATE=#{param11,
+		jdbcType=VARCHAR},
+		MOVIE_TRAILER=#{param12,
+		jdbcType=VARCHAR}
+
+		WHERE
+		MOVIE_CODE =#{param1,
+		jdbcType=VARCHAR}
+
+
+	</update>
+
+	<delete id="movie_delete">
+		DELETE FROM PG_MOVIE WHERE MOVIE_CODE=#{param1,
+		jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="movie_insert_page">
+		<!-- movie_insert_page에 가져와야 할 값이 있음으로 이쪽으로 연결해주기 -->
+		INSERT INTO PG_MOVIE(MOVIE_CODE,MOVIE_TITLE,MOVIE_IMG,
+		MOVIE_AGE,MOVIE_TIME,MOVIE_SUMMARY,MOVIE_DIRECTOR,
+		MOVIE_ACTOR,MOVIE_GENRE,MOVIE_NATION,MOVIE_DATE,MOVIE_TRAILER) VALUES(
+
+		MOVIE_CODE_SEQ.NEXTVAL,#{param1, jdbcType=VARCHAR},#{param2,
+		jdbcType=VARCHAR},#{param3, jdbcType=VARCHAR},
+		#{param4,
+		jdbcType=VARCHAR},
+		#{param5, jdbcType=VARCHAR},#{param6,
+		jdbcType=VARCHAR},#{param7,
+		jdbcType=VARCHAR},#{param8,
+		jdbcType=VARCHAR}
+		,#{param9, jdbcType=VARCHAR},#{param10,
+		jdbcType=VARCHAR},#{param11,
+		jdbcType=VARCHAR})
+
+	</insert>
+
+	<select id="review_list"
+		resultType="com.tech.PlamingGo.dto.MovieDto">
+
+		SELECT * FROM MPG_REVIEW WHERE JOIN_CODE=#{param1}
+
+	</select>
+
+	<insert id="review_insert">
+		INSERT INTO
+		MPG_REVIEW(REVIEW_NUM,JOIN_CODE,MREVIEW_WRITER,
+		MREVIEW_CONTENT,MREVIEW_DATE)
+		VALUES(review_num_seq.nextval,#{param1
+		,jdbcType=VARCHAR},#{param2 ,jdbcType=VARCHAR}
+		,#{param3
+		,jdbcType=VARCHAR},sysdate)
+
+	</insert>
+
+	<update id="review_modify">
+		UPDATE MPG_REVIEW SET
+		MREVIEW_WRITER=#{param2},MREVIEW_CONTENT=#{param3},
+		MREVIEW_RATING=#{param4}
+		WHERE
+		REVIEW_NUM=#{param1}
+	</update>
+
+	<delete id="review_delete">
+		DELETE FROM MPG_REVIEW WHERE
+		REVIEW_NUM=#{param1,jdbcType=VARCHAR}
+
+	</delete>
+
+	<!-- 검색창 -->
+	<select id="search" resultType="com.tech.PlamingGo.dto.MovieDto">
+		SELECT
+		MOVIE_CODE,MOVIE_IMG,MOVIE_TITLE,MOVIE_DATE,MOVIE_RATING,MOVIE_AGE
+		FROM (SELECT
+		MOVIE_CODE,MOVIE_IMG,MOVIE_TITLE,MOVIE_DATE,MOVIE_RATING,MOVIE_AGE,
+		ROW_NUMBER() OVER(ORDER BY MOVIE_DATE DESC, MOVIE_RATING DESC)
+		MOVIE_CODE_SEQ
+		FROM PG_MOVIE
+		<include refid="getSearchList" />
+		)
+		WHERE MOVIE_CODE_SEQ BETWEEN #{param1} AND #{param2}
+	</select>
+
+	<!-- 검색창 + 페이징처리 -->
+	<select id="selectSearchCount" resultType="Integer">
+		SELECT COUNT(*) FROM PG_MOVIE
+		<include refid="getSearchCount" />
+	</select>
+
+
+</mapper>

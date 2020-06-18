@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="com.tech.PlamingGo.dao.PDao">
+ 	<sql id="includeCount">
+ 		<choose>
+ 			<when test="param2==1">
+ 				WHERE (NTITLE LIKE '%'||#{param1}||'%')
+ 			</when>
+ 			<when test="param2==2">
+                     WHERE (NCONTENT LIKE '%'||#{param1}||'%')        
+			</when>
+			<when test="param2==3">
+                     WHERE (NTITLE LIKE '%'||#{param1}||'%' or NCONTENT LIKE '%'||#{param1}||'%')         
+			</when>
+			<otherwise>
+				
+			</otherwise>
+ 		</choose>
+ 	</sql>
+ 	
+ 	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+                     WHERE (NTITLE LIKE '%'||#{param3}||'%')          
+			</when>
+			<when test="param4==2">
+                     WHERE (NCONTENT LIKE '%'||#{param3}||'%')        
+			</when>
+			<when test="param4==3">
+                     WHERE (NTITLE LIKE '%'||#{param3}||'%' or NCONTENT LIKE '%'||#{param3}||'%')         
+			</when>
+			<otherwise>
+				
+			</otherwise>
+			
+		</choose>
+    </sql>
+    <select id="list" resultType="com.tech.PlamingGo.dto.NoticeDto">
+		SELECT NNUM,NWRITER,NTITLE,NCONTENT,NDATE,
+		NHIT,NGROUP,NSTEP,NINDENT FROM
+		(SELECT NNUM,NNAME,NTITLE,NCONTENT,NDATE,
+		NHIT,NGROUP,NSTEP,NINDENT, ROW_NUMBER()
+		OVER(ORDER BY NGROUP DESC,NSTEP ASC) N_SEQ 
+		FROM MVC_BOARD
+		<include refid="includeList" />
+		) 
+		WHERE N_SEQ BETWEEN #{param1} AND #{param2}
+	</select>
+	<select id="selectNoticeCount" resultType="Integer">
+		SELECT COUNT(*) FROM pg_notice
+		<include refid="includeCount" />
+	</select>
+	<insert id="write">
+		INSERT INTO pg_notice(NNUM,NNAME,NTITLE,
+					NCONTENT, NHIT,NGROUP,NSTEP,NINDENT,FILESRC)
+					 VALUES(PG_NOTICE_SEQ.NEXTVAL,
+					#{param1},#{param2},#{param3},0,
+					PG_NOTICE_SEQ.CURRVAL,0,0,#{param4})
+	</insert>
+	<select id="contentView" resultType="com.tech.PlamingGo.dto.NoticeDto">
+		SELECT * FROM PG_NOTICE WHERE NNUM=#{param1}
+	</select>
+	<update id="upHit">
+		UPDATE PG_NOTICE SET
+				 NHIT=NHIT+1 WHERE NNUM=#{param1}
+	</update>
+	<update id="modify">
+		UPDATE PG_NOTICE SET NWRITER=#{param2},
+					NTITLE=#{param3},NCONTENT=#{param4}
+					 WHERE NNUM=#{param1}
+	</update>
+	<delete id="delete">
+		DELETE FROM PG_NOTICE WHERE NNUM=#{param1}
+	</delete>
+	<select id="reply_view" resultType="com.tech.PlamingGo.dto.NoticeDto">
+		SELECT * FROM PG_NOTICE WHERE NNUM=#{param1}
+	</select>
+	<insert id="reply">
+		INSERT INTO PG_NOTICE(NNUM,NWRITER,
+					NTITLE,NCONTENT,
+					NGROUP,NSTEP,NINDENT) 
+					VALUES(PG_NOTICE_SEQ.NEXTVAL,
+					#{param2},#{param3},#{param4},
+					#{param5},#{param6}+1,#{param7}+1)
+	</insert>
+	<update id="stepup">
+		UPDATE PG_NOTICE SET NSTEP=NSTEP+1
+				 WHERE (BGROUP=#{param1} 
+				 AND NSTEP>#{param2})
+	</update>
+ 	
+ </mapper>

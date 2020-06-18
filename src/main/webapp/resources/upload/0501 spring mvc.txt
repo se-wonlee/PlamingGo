@@ -1,0 +1,52 @@
+web.xml에 필터걸기
+
+<filter>
+ <filter-name>encodingFilter</filter-name>
+ <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+
+ <init-param>
+ <param-name>encoding</param-name>
+ <param-value>UTF-8</param-value>
+ </init-param>
+ </filter>
+ 
+ <filter-mapping>
+ <filter-name>encodingFilter</filter-name>
+ <url-pattern>/*</url-pattern>
+ </filter-mapping>
+
+-----------------------------------------------
+
+web-inf 에 lib 폴더추가 -> ojdbc6.jar 넣기
+
+----------------------------------------------
+
+pom.xml 에 밑에꺼 추가후 메이븐에 추가됬는지확인
+
+<dependency>
+		<groupId>com.oracle</groupId>
+		<artifactId>ojdbc6</artifactId>
+		<version>11.2.0.4</version>
+		<scope>system</scope>
+		<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ojdbc6.jar</systemPath>
+</dependency> 
+
+-----------------------------------------------
+
+
+Servers 폴더 -> context.xml ->
+
+<Resource name="jdbc/orcl"
+auth="Container"
+type="javax.sql.DataSource"
+driverClassName="oracle.jdbc.driver.OracleDriver"
+username="scott"
+password="123456"
+url="jdbc:oracle:thin:@localhost:1521:orcl"
+maxWait="5000"
+/>
+
+밑에 붙여놓고 다음과정은 사진..
+
+
+-----------------------------------------------

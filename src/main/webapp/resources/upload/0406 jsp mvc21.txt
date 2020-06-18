@@ -1,0 +1,90 @@
+1.....
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>layerpopup.jsp</title>
+<script src="../JS/jquery-3.4.1.min.js"></script>
+<script src="../JS/jquery.bpopup.min.js"></script>
+<style>
+	.Pstyle{
+		opacity: 0;
+		display: none;
+		position: relative;
+		left: 100px;
+		width: auto;
+		border: 5px solid #fff;
+		padding: 20px;
+		background-color: #f00;
+		
+		width: 300px;
+		height: 530px; 
+	}
+	.b-close{
+		position: absolute;
+		right: 5px;
+		top: 5px;
+		padding: 0px;
+		display: inline-block;
+		cursor: pointer;
+	}
+	#popup{
+		position: relative;
+	}
+	#imgidx{
+		top: 50px;
+		position: absolute;
+	}
+	img{
+		position: absolute;
+		top: 40px;
+	}
+</style>
+<script>
+	function goPopup() {
+		$("#popup").bPopup();	
+	}
+</script>
+	
+</head>
+<body>
+	<h2>layoutpopup</h2>
+	<input type="button" value="클릭팝업" onclick="goPopup()" />
+	<div id="popup" class="Pstyle">
+		<span class="b-close">close</span>
+		<img src="../img/img1.PNG" alt="" />
+		<div id="imgidx" class="content" style="height: auto;width: auto;">
+		레이어팝업완성 <br />팝업의 크기는 content div에서 조정</div>
+	</div>
+	클릭시 팝업창을띄우고 중앙으로사진항상따라오기	
+</body>
+</html>
+
+==========================================================================
+
+
+2............ mvc2   jspweb6 여기서메소드를만들고 다른곳에 다간편하게 연결시켜줌
+
+package notice.db;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class DBCon {
+	
+	public static Connection getConnection() throws Exception{
+		//이메소드로 다른곳에 다연결시켜줄수있음
+		Class.forName("oracle.jdbc.driver.OracleDriver");
+
+		String url="jdbc:oracle:thin:@localhost:1521:orcl";
+		String user="scott";
+		String pw="123456";
+		Connection con = DriverManager.getConnection(url,user,pw);
+		
+		return con;
+	}
+	
+}

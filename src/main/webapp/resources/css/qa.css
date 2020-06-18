@@ -1,0 +1,120 @@
+article table#notice {
+    width: 1000px;
+    border-collapse: collapse;
+    border-top: 100px;
+}
+#tc{
+	text-align: center;
+}
+#tee{
+	display: table;
+	width: 300px;
+	height: 200px;
+}
+#tee1{
+	display : table-cell;
+	text-align: center;
+	vertical-align: middle;
+}
+
+#tee2{
+	text-align: center;
+}
+
+article table#notice th {
+	align-content: center;
+    height: 20px;
+    text-transform: capitalize;
+    font-size: 14px;
+    font-family: Arial;
+    font-weight: bold;
+    padding: 5px;
+    background-image: ;
+    background-repeat: repeat-x;
+    background-position: center center;
+    color: black;
+}
+
+article table#notice td {
+    text-align: center;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-style: none;
+    border-bottom-color: #9;
+}
+
+article table#notice td.left {
+    text-align: left;
+}
+
+article th.qna_num {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    width: 50px;
+}
+
+article th.qna_title {
+    width: 400px;
+    letter-spacing: 0.7em;
+}
+
+article th.qna_writer {
+    width: 100px;
+}
+
+article th.qna_date {
+    width: 50px;
+}
+
+article th.qna_hits {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    width: 50px;
+}
+
+article #table_search {
+    margin: 15px 750px 15px 10px;
+    float: right;
+}
+
+#table_search .input_box {
+    height: 20px;
+    width: 200px;
+    padding: 0 10px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    background-color: #fefded;
+    margin: auto;
+    display: inline-block;
+}
+
+#table_search .btn {
+  	padding: 1px;
+    width: 90px;
+    border: 2px solid #999;
+    border-radius: 10px;
+    color: black;
+    background-repeat: repeat-x;
+    background-position: center center;
+}
+
+#page_control {
+    text-align: center;
+    margin: 20px 0 0 0;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#page_control a {
+    padding: 2px 5px;
+    text-decoration: none;
+    color: #333;
+    margin: 0 5px;
+}
+
+#page_control a:hover {
+    font-weight: bold;
+    text-decoration: underline;
+    color: #f90;
+
+}

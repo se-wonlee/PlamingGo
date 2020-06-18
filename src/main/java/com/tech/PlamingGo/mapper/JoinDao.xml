@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.PlamingGo.dao.JoinDao">
+
+<select id="malelist" resultType="int">
+	
+	SELECT COUNT(*) FROM pg_user WHERE USER_GENDER=1
+	</select>
+	<select id="femalelist" resultType="int">
+	
+SELECT COUNT(*) FROM pg_user WHERE USER_GENDER=2
+	</select>
+	
+	
+	<select id="basiclist" resultType="int">
+	
+	SELECT COUNT(*) FROM PG_USER WHERE USER_LEVEL='베이직'
+	</select>
+	
+	<select id="standardlist" resultType="int">
+	
+	SELECT COUNT(*) FROM PG_USER WHERE USER_LEVEL='스탠다드'
+	</select>
+	
+	<select id="premiumlist" resultType="int">
+	
+	SELECT COUNT(*) FROM PG_USER WHERE USER_LEVEL='프리미엄'
+	</select>
+	
+	
+	<update id="change_pw" >
+	UPDATE PG_USER SET USER_PASS=#{param2} WHERE USER_ID=#{param1}
+	</update>
+	
+	<select id="findpw" resultType="com.tech.PlamingGo.dto.JoinDto" >
+	SELECT * FROM PG_USER WHERE USER_ID=#{param1} AND USER_NAME=#{param2} AND USER_PHONE=#{param3}
+	</select>
+	
+	
+	<select id="findid" resultType="com.tech.PlamingGo.dto.JoinDto" >
+	SELECT USER_ID FROM PG_USER WHERE USER_NAME=#{param1} AND USER_MAIL=#{param2}
+	</select>
+	
+	
+	<select  id="userlist" resultType="com.tech.PlamingGo.dto.JoinDto" >
+	SELECT * FROM PG_USER ORDER BY USER_CODE ASC
+	</select>
+	
+	<update id="modi">
+	UPDATE PG_USER SET USER_NAME=#{param2},
+					USER_MAIL=#{param3},
+					USER_PHONE=#{param4}
+					 WHERE USER_ID=#{param1}
+	</update>
+	
+	<select id="mypage" resultType="com.tech.PlamingGo.dto.JoinDto">
+	SELECT * FROM PG_USER WHERE USER_ID = #{param1}
+</select>
+	
+
+	<insert id="register">
+    INSERT INTO PG_USER VALUES(
+    USER_CODE_SEQ.NEXTVAL,
+    #{param1},
+    #{param2},
+    #{param3},
+    #{param4},
+    #{param5},
+    #{param6},
+    #{param7},
+    SYSDATE,
+     '베이직',
+     0
+    )
+    </insert>
+ 
+    <select id="login" resultType="com.tech.PlamingGo.dto.JoinDto">
+    SELECT USER_ID, USER_PASS FROM PG_USER WHERE
+     USER_ID={param1} AND 
+     USER_PASS=#{param2}
+    </select>
+
+</mapper>

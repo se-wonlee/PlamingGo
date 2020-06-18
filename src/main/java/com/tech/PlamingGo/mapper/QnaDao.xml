@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.PlamingGo.dao.QnaDao">
+
+<sql id="includeCount">
+		<choose>
+			<when test="param2==1">
+                     WHERE (QNA_TITLE LIKE '%'||#{param1}||'%')          
+			</when>
+			<when test="param2==2">
+                     WHERE (QNA_CONTENT LIKE '%'||#{param1}||'%')        
+			</when>
+			<when test="param2==3">
+                     WHERE (QNA_TITLE LIKE '%'||#{param1}||'%' or QNA_CONTENT LIKE '%'||#{param1}||'%')         
+			</when>
+			<otherwise>
+				
+			</otherwise>
+			
+		</choose>
+    </sql>
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+                     WHERE (QNA_TITLE LIKE '%'||#{param3}||'%')          
+			</when>
+			<when test="param4==2">
+                     WHERE (QNA_CONTENT LIKE '%'||#{param3}||'%')        
+			</when>
+			<when test="param4==3">
+                     WHERE (QNA_TITLE LIKE '%'||#{param3}||'%' or QNA_CONTENT LIKE '%'||#{param3}||'%')         
+			</when>
+			<otherwise>
+				
+			</otherwise>
+			
+		</choose>
+    </sql>
+
+<select id="c_list" resultType="com.tech.PlamingGo.dto.QnaDto">
+ 		SELECT QNA_NUM,QNA_ID,QNA_TITLE,QNA_CONTENT,
+ 				QNA_DATE,QNA_HITS,QNA_GROUP,QNA_STEP,
+ 				QNA_INDENT FROM (SELECT QNA_NUM,QNA_ID,
+ 				QNA_TITLE,QNA_CONTENT,
+ 				QNA_DATE,QNA_HITS,QNA_GROUP,QNA_STEP,
+ 				QNA_INDENT, ROW_NUMBER()
+				OVER(ORDER BY QNA_GROUP DESC,QNA_STEP ASC) B_SEQ 
+				FROM PG_QNA
+				<include refid="includeList" />
+				)
+				WHERE B_SEQ BETWEEN #{param1} AND #{param2}
+</select>
+<select id="selectBoardCount" resultType="Integer">
+		SELECT COUNT(*) FROM PG_QNA
+		<include refid="includeCount" />
+	</select>
+<insert id="c_write">
+	INSERT INTO PG_QNA(QNA_NUM,QNA_ID,QNA_TITLE,
+					QNA_CONTENT,QNA_HITS,QNA_GROUP,QNA_STEP,QNA_INDENT,FILESRC)
+					 VALUES(QNA_NUM_SEQ.NEXTVAL,
+					#{param1},#{param2},#{param3},0, <!-- 1,2,3의 해당하는 ?(BNAME),?(BTITLE),?(BCONTENT)를 #{PARAM1,2,3}로 수정-->
+					QNA_NUM_SEQ.CURRVAL,0,0,#{param4})
+	</insert>
+<select id="c_contentview" resultType="com.tech.PlamingGo.dto.QnaDto">
+	SELECT * FROM PG_QNA WHERE QNA_NUM=#{param1}
+</select>
+
+<update id="upHit">
+	UPDATE PG_QNA SET
+		QNA_HITS=QNA_HITS+1 WHERE QNA_NUM=#{param1}
+</update>
+<update id="c_modify">
+		UPDATE PG_QNA SET QNA_ID=#{param2},
+					QNA_TITLE=#{param3},QNA_CONTENT=#{param4}
+					 WHERE QNA_NUM=#{param1}
+</update>
+ <delete id="c_delete">
+	DELETE FROM PG_QNA WHERE QNA_NUM=#{param1}
+</delete>
+ <select id="c_replyview" resultType="com.tech.PlamingGo.dto.QnaDto">
+		SELECT * FROM PG_QNA WHERE QNA_NUM=#{param1}
+	</select>
+<insert id="c_reply">
+		INSERT INTO PG_QNA(QNA_NUM,QNA_ID,
+					QNA_TITLE,QNA_CONTENT,
+					QNA_GROUP,QNA_STEP,QNA_INDENT) 
+					VALUES(QNA_NUM_SEQ.NEXTVAL,
+					#{param2},#{param3},#{param4},
+					#{param5},#{param6}+1,#{param7}+1)
+	</insert>
+	<update id="stepup">
+		UPDATE PG_QNA SET QNA_STEP=QNA_STEP+1
+				 WHERE (QNA_GROUP=#{param1} 
+				 AND QNA_STEP>#{param2})
+	</update>
+</mapper>
